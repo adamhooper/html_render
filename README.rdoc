@@ -1,4 +1,55 @@
-DEPENDENCIES
+= html_render
+
+html_render translates strings of HTML into PNG images.
+
+The procedure is anything but magical. The process amounts to:
+
+0. POST the HTML to a URL which translates HTML into PNG.
+0. Read in the response.
+
+The benefit comes when different URLs translate HTML into PNG differently.
+With logic spanning many operating systems and web browser libraries, it is
+possible to render several different PNGs for the same HTML. We can compare
+the different PNGs to determine if our HTML is exposing a browser bug.
+
+== Install
+
+  gem install adamh-html_render --source http://gems.github.com
+
+== Example code
+
+  require 'rubygems'
+  require 'html_render'
+
+  ff3_renderer = HTMLRender::Renderers::HTTPRenderer.new('http://localhost:20558/ff3-linux')
+  ie6_renderer = HTMLRender::Renderers::HTTPRenderer.new('http://winxp-ie6.local:20558/ie')
+
+  html = '<html><body>Here is my HTML!</body></html>'
+
+  ff3_image = ff3_renderer.render(html)
+  ie6_image = ie6_renderer.render(html)
+
+  if ff3_image != ie6_image
+    puts 'Images differ! Differences recorded in diff.png'
+    diff = ff3_image.difference(ie6_image)
+    File.open('diff.png', 'w') { |f| f.write(diff.to_blob) }
+  end
+
+== Usefulness
+
+Because of different text-rendering engines, different browsers and operating
+systems will almost always produce differing PNG files. The
++HTMLRender::Images::PNGImage.difference+ method produces a graphic with which
+a person can quickly determine whether the changes are significant or not.
+
+The intent behind this design--producing comparison images rather than using
+fuzzy image matching--is for a manual verification process: presenting a user
+with a list of rendered images so the user can quickly determine which images
+are acceptable and which indicate a bug in the HTML (or, more commonly, a bug
+in the browser which the HTML must work around). The engineering of such a
+workflow is beyond the scope of this project.
+
+== Dependencies
 
 - httpclient >=2.1.4
 - RMagick >= 2.9.1
