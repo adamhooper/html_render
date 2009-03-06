@@ -7,8 +7,8 @@ Gem::Specification.new do |s|
   s.date = %q{2009-03-06}
   s.description = %q{Make images from HTML strings}
   s.email = %q{adam@adamhooper.com}
-  s.extra_rdoc_files = ["README.rdoc", "lib/html_render.rb", "lib/html_render/renderers.rb", "lib/html_render/images.rb"]
-  s.files = ["README.rdoc", "Rakefile", "lib/html_render.rb", "lib/html_render/renderers.rb", "lib/html_render/images.rb", "Manifest", "html_render.gemspec"]
+  s.extra_rdoc_files = ["README.rdoc", "lib/html_render.rb", "lib/html_render/render_batches.rb", "lib/html_render/renderers.rb", "lib/html_render/images.rb"]
+  s.files = ["README.rdoc", "Rakefile", "html_render.gemspec", "lib/html_render.rb", "lib/html_render/render_batches.rb", "lib/html_render/renderers.rb", "lib/html_render/images.rb", "Manifest"]
   s.has_rdoc = true
   s.homepage = %q{http://adamhooper.com/eng}
   s.rdoc_options = ["--line-numbers", "--inline-source", "--title", "Html_render", "--main", "README.rdoc"]
