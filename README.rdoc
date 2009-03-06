@@ -1,0 +1,4 @@
+DEPENDENCIES
+
+- httpclient >=2.1.4
+- RMagick >= 2.9.1

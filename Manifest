@@ -1,0 +1,6 @@
+README.rdoc
+Rakefile
+lib/html_render.rb
+lib/html_render/renderers.rb
+lib/html_render/images.rb
+Manifest
