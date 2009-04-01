@@ -26,7 +26,10 @@ module HTMLRender::Renderers
     def render(html)
       client = HTTPClient.new
 
-      response = client.post(url, html)
+      begin
+        response = client.post(url, html)
+      end
+
       if response.status != 200
         raise ServerError.new("Unexpected HTTP server response from #{url}: #{response.inspect}")
       end

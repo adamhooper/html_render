@@ -6,4 +6,5 @@ lib/html_render/render_batches.rb
 lib/html_render/renderers.rb
 lib/html_render/images.rb
 lib/html_render/render_test.rb
+lib/html_render/render_test/rails.rb
 Manifest

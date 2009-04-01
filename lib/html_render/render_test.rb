@@ -34,6 +34,14 @@ module HTMLRender::RenderTest
       raise NotImplementedError
     end
 
+    def details
+      returning({}) do |h|
+        servers.each do |server|
+          h[server] = details_for(server)
+        end
+      end
+    end
+
     # Returns the ServerResult corresponding to the given Server
     def details_for(server)
       raise NotImplementedError
@@ -128,10 +136,13 @@ module HTMLRender::RenderTest
   # HtmlRender::Renderers::HTTPRenderer::ServerError if the render fails.
   # It will return an HtmlRender::RenderTest::Result.
   class DirectoryRenderTest
-    attr_reader :path
+    attr_reader :test_path, :run_path
 
-    def initialize(path)
-      @path = path
+    def initialize(test_path, run_path, &block)
+      @test_path = test_path
+      @run_path = run_path
+
+      yield(self) if block_given?
     end
 
     def html
@@ -141,17 +152,17 @@ module HTMLRender::RenderTest
     end
 
     def run(servers_hash)
-      run_path = create_new_run_path!
+      clear_run_directory
 
       begin
         batch = HTMLRender::RenderBatches::HTTPRenderBatch.new(servers_hash)
-        batch.render_html_to_directory(html, create_new_run_path!)
+        batch.render_html_to_directory(html, run_path)
       rescue Exception => e
-        FileUtils.rm_r(run_path)
-        throw e
+        clear_run_directory
+        raise e
       end
 
-      DirectoryResult.new(run_path, valid_path, canonical_path)
+      last_result
     end
 
     # Returns the results of the last test. If the "valid" results changed
@@ -159,40 +170,25 @@ module HTMLRender::RenderTest
     # return a different value than before (since it will compare the
     # previously-generated actual .png's with the newer expected .png's).
     def last_result
-      DirectoryResult.new(last_run_path, valid_path, canonical_path)
+      DirectoryResult.new(run_path, valid_path, canonical_path)
     end
 
     private
 
+    def clear_run_directory
+      FileUtils.rm(Dir.glob(File.join(run_path, '*.png')))
+    end
+
     def html_path
-      File.join(path, 'html.html')
-    end
-
-    def last_run_path
-      runs_path = File.join(path, 'runs', '??????????????')
-      Dir.glob(runs_path).sort.last
-    end
-
-    def create_new_run_path!
-      path = new_run_path
-      FileUtils.mkdir_p(path)
-      path
+      File.join(test_path, 'html.html')
     end
 
     def canonical_path
-      @canoncial_path ||= File.join(path, 'canonical.png')
+      File.join(test_path, 'canonical.png')
     end
 
     def valid_path
-      @valid_path ||= File.join(path, 'valid')
-    end
-
-    def new_run_path
-      File.join(path, 'runs', current_timestamp_string)
-    end
-
-    def current_timestamp_string
-      Time.now.utc.strftime('%Y%m%d%H%M%S')
+      File.join(test_path, 'valid')
     end
   end
 end
