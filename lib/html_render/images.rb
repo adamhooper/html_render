@@ -23,7 +23,8 @@ module HTMLRender::Images
     end
 
     def <=>(other)
-      (png <=> other.png) == 0
+      self.class.name <=> other.class.name unless PNGImage === other
+      png <=> other.png
     end
 
     def difference(other)

@@ -15,6 +15,8 @@ module HTMLRender::Renderers
   # One should POST the HTML to the given URL, and the server should
   # respond with a PNG image.
   class HTTPRenderer < Base
+    class ServerError < Exception; end
+
     attr_accessor :url
 
     def initialize(url)
@@ -26,7 +28,7 @@ module HTMLRender::Renderers
 
       response = client.post(url, html)
       if response.status != 200
-        raise Exception.new("Unexpected HTTP server response from #{url}: #{response.inspect}")
+        raise ServerError.new("Unexpected HTTP server response from #{url}: #{response.inspect}")
       end
 
       HTMLRender::Images::PNGImage.new(response.content)
