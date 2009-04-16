@@ -49,6 +49,12 @@ are acceptable and which indicate a bug in the HTML (or, more commonly, a bug
 in the browser which the HTML must work around). The engineering of such a
 workflow is beyond the scope of this project.
 
+== Rails Integration
+
+html_render is designed for easy integration with Rails. Visit
+http://adamhooper.com/eng/articles/4 for instructions on setting up an
+HTML-rendering component to your automated Rails test suite.
+
 == Dependencies
 
 - httpclient >=2.1.4
