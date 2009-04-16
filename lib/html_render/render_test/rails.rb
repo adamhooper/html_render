@@ -75,7 +75,7 @@ module HTMLRender::RenderTest::Rails
       ""
     end
 
-    private
+    protected
 
     def controller
       returning(ActionView::TestCase::TestController.new) do |controller|
@@ -94,6 +94,74 @@ module HTMLRender::RenderTest::Rails
       File.open(last_run_html_file, 'w') do |f|
         f.write(html)
       end
+    end
+  end
+
+  module TestCaseDefinitions
+    def create_test_case_from_path(relative_path, options)
+      clazz = options[:base_class] || RenderTest
+      base_path = options[:test_prefix]
+      servers = options[:servers]
+
+      test_path = absolute_test_path(relative_path, base_path)
+      run_path = absolute_run_path(relative_path, base_path)
+
+      setup_filename = File.join(test_path, 'setup.rb')
+      setup_code = File.open(setup_filename) { |f| f.read }
+
+      template_path = File.dirname(relative_path)
+      template_dirname = File.dirname(template_path)
+      template_basename = File.basename(template_path)
+      rails_template_basename = template_basename.sub(/^_/, '')
+      rails_template_path = File.join(template_dirname, rails_template_basename)
+
+      FileUtils.mkdir_p(run_path)
+
+      clazz.new(test_path, run_path) do |test_case|
+        test_case.instance_eval(<<-EOT, __FILE__, __LINE__)
+          def template_path
+            #{rails_template_path.inspect}
+          end
+        EOT
+
+        test_case.instance_eval(setup_code, setup_filename, 1)
+      end
+    end
+
+    def define_single_test(setup_path, base_path, servers, options)
+      relative_path = setup_path[(base_path.length + 1)..-10]
+      template_path = File.dirname(relative_path)
+      test_key = File.basename(relative_path)
+
+      self.test("Rendering #{template_path}, case '#{test_key}'") do
+        test_case = self.class.create_test_case_from_path(relative_path, options.merge(:test_prefix => base_path))
+        result = test_case.run(servers)
+        result.details.each do |server, detail|
+          assert(detail.pass?, "Should render properly on #{server}")
+        end
+      end
+    end
+
+    def define_tests(base_path, options)
+      servers = options.delete(:servers)
+
+      if !servers || !servers.is_a?(Hash)
+        raise ArgumentError.new("options[:servers] must be a hash of :unique_identifier => \"http://path.to.server/which/renders/pngs\"")
+      end
+
+      Dir.glob(File.join(base_path, '**', 'setup.rb')).each do |setup_path|
+        self.define_single_test(setup_path, base_path, servers, options)
+      end
+    end
+
+    private
+
+    def absolute_test_path(relative_path, base_path)
+      File.join(base_path, relative_path)
+    end
+
+    def absolute_run_path(relative_path, base_path)
+      File.join(absolute_test_path(relative_path, base_path), 'run')
     end
   end
 end
