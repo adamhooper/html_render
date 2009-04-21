@@ -2,7 +2,7 @@ require 'rubygems'
 require 'rake'
 require 'echoe'
 
-Echoe.new('html_render', '0.0.3') do |p|
+Echoe.new('html_render', '0.0.4') do |p|
   p.description = 'Make images from HTML strings'
   p.url = 'http://adamhooper.com/eng'
   p.author = 'Adam Hooper'

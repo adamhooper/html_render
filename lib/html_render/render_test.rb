@@ -7,18 +7,34 @@ module HTMLRender::RenderTest
   class Result
     # The portion of a result specific to an individual server
     class ServerResult
-      attr_reader :server, :expected, :actual
+      attr_reader :server, :expected_path, :actual_path
 
       # Initializes the ServerResult.
       #
       # Params:
       #   server: name of the server
-      #   expected: Image we expected
-      #   actual: Image we got
-      def initialize(server, expected, actual)
+      #   expected_path: Path to image we expected
+      #   actual_path: Path to image we got
+      def initialize(server, expected_path, actual_path)
         @server = server
-        @expected = expected
-        @actual = actual
+        @expected_path = expected_path
+        @actual_path = actual_path
+      end
+
+      def expected
+        @expected ||= if expected_path
+          File.open(expected_path) do |f|
+            HTMLRender::Images::PNGImage.new(f.read)
+          end
+        end
+      end
+
+      def actual
+        @actual ||= if actual_path
+          File.open(actual_path) do |f|
+            HTMLRender::Images::PNGImage.new(f.read)
+          end
+        end
       end
 
       def pass?
@@ -71,36 +87,12 @@ module HTMLRender::RenderTest
       @details_for ||= {}
       @details_for[server] ||= ServerResult.new(
         server,
-        expected_png_for(server),
-        actual_png_for(server)
+        filename_of_expected_png_for(server),
+        filename_of_actual_png_for(server)
       )
     end
 
     private
-
-    # Returns the PNG we actually got for the given server name
-    def actual_png_for(server)
-      @actual_png_for ||= {}
-      @actual_png_for[server] ||= begin
-        filename = filename_of_actual_png_for(server)
-        File.open(filename) do |f|
-          HTMLRender::Images::PNGImage.new(f.read)
-        end
-      end
-    end
-
-    # Returns the PNG expected of the given server name, or nil
-    def expected_png_for(server)
-      @expected_png_for ||= {}
-      @expected_png_for[server] ||= begin
-        filename = filename_of_expected_png_for(server)
-        if filename
-          File.open(filename) do |f|
-            HTMLRender::Images::PNGImage.new(f.read)
-          end
-        end
-      end
-    end
 
     def filename_of_actual_png_for(server)
       # Assume it exists--otherwise, "servers" wouldn't return it

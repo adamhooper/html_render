@@ -53,6 +53,7 @@ module HTMLRender::RenderTest::Rails
       <html xmlns='http://www.w3.org/1999/xhtml'>
         <head>
           <title>Test</title>
+          <meta name="Content-type" content="text/html; charset=utf-8" />
           <style type="text/css">
             #{css}
           </style>
@@ -86,7 +87,9 @@ module HTMLRender::RenderTest::Rails
     end
 
     def view
-      ActionView::Base.new(ActionController::Base.view_paths, assigns, controller)
+      returning(ActionView::Base.new(ActionController::Base.view_paths, assigns, controller)) do |view|
+        view.helpers.send(:include, view.controller.master_helper_module)
+      end
     end
 
     def write_html_to_run_directory
