@@ -100,7 +100,7 @@ module HTMLRender::RenderTest::Rails
     end
   end
 
-  module TestCaseDefinitions
+  module Common
     def create_test_case_from_path(relative_path, options)
       clazz = options[:base_class] || RenderTest
       base_path = options[:test_prefix]
@@ -130,14 +130,74 @@ module HTMLRender::RenderTest::Rails
         test_case.instance_eval(setup_code, setup_filename, 1)
       end
     end
+    module_function(:create_test_case_from_path)
 
+    private
+
+    def self.absolute_test_path(relative_path, base_path)
+      File.join(base_path, relative_path)
+    end
+
+    def self.absolute_run_path(relative_path, base_path)
+      File.join(absolute_test_path(relative_path, base_path), 'run')
+    end
+  end
+
+  if defined?(Spec)
+    class RenderExampleGroup < Spec::Example::ExampleGroup
+      def self.define_example(setup_path, base_path, servers, options)
+        relative_path = setup_path[(base_path.length + 1)..-10]
+        template_path = File.dirname(relative_path)
+        test_key = File.basename(relative_path)
+
+        it 'should render properly' do
+          test_case = Common::create_test_case_from_path(relative_path, options.merge(:test_prefix => base_path))
+          result = test_case.run(servers)
+          result.details.each do |server, detail|
+            detail.pass?.should == true
+          end
+        end
+      end
+
+      def self.define_examples(base_path, options)
+        servers = options.delete(:servers)
+
+        if !servers || !servers.is_a?(Hash)
+          raise ArgumentError.new("options[:servers] must be a hash of :unique_identifier => \"http://path.to.server/which/renders/pngs\"")
+        end
+
+        cwd = []
+        context_stack = []
+
+        paths = Dir.glob(File.join(base_path, '**', 'setup.rb')).sort.each do |setup_path|
+          relative_path = File.dirname(setup_path[(base_path.length + 1)..-1])
+          path_parts = relative_path.split('/')
+
+          until relative_path =~ %r%^#{Regexp.quote(cwd.join('/'))}%
+            cwd.pop
+            context_stack.pop
+          end
+
+          until cwd.length == path_parts.length
+            cwd.push(path_parts[cwd.length])
+            context_stack.push((context_stack.last || self).describe("/#{cwd.join('/')}", :type => :render))
+          end
+
+          context_stack.last.define_example(setup_path, base_path, servers, options)
+        end
+      end
+    end
+    Spec::Example::ExampleGroupFactory.register(:render, RenderExampleGroup)
+  end
+
+  module TestCaseDefinitions
     def define_single_test(setup_path, base_path, servers, options)
       relative_path = setup_path[(base_path.length + 1)..-10]
       template_path = File.dirname(relative_path)
       test_key = File.basename(relative_path)
 
       self.test("Rendering #{template_path}, case '#{test_key}'") do
-        test_case = self.class.create_test_case_from_path(relative_path, options.merge(:test_prefix => base_path))
+        test_case = Common::create_test_case_from_path(relative_path, options.merge(:test_prefix => base_path))
         result = test_case.run(servers)
         result.details.each do |server, detail|
           assert(detail.pass?, "Should render properly on #{server}")
