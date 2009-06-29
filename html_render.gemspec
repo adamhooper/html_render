@@ -2,11 +2,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{html_render}
-  s.version = "0.0.5"
+  s.version = "0.0.6"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 1.2") if s.respond_to? :required_rubygems_version=
   s.authors = ["Adam Hooper"]
-  s.date = %q{2009-04-21}
+  s.date = %q{2009-06-29}
   s.description = %q{Make images from HTML strings}
   s.email = %q{adam@adamhooper.com}
   s.extra_rdoc_files = ["README.rdoc", "lib/html_render.rb", "lib/html_render/render_batches.rb", "lib/html_render/renderers.rb", "lib/html_render/images.rb", "lib/html_render/render_test.rb", "lib/html_render/render_test/rails.rb"]
