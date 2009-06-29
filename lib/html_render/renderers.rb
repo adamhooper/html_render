@@ -27,7 +27,17 @@ module HTMLRender::Renderers
       client = HTTPClient.new
 
       begin
-        response = client.post(url, html)
+        response = client.post(url, html, {
+          'Content-Type' => 'application/x-www-form-urlencoded; charset=UTF-8'
+        })
+      rescue HTTPClient::BadResponseError => e
+        raise ServerError.new("Bad response from #{url}: #{e.message}")
+      rescue HTTPClient::TimeoutError => e
+        raise ServerError.new("Timeout from #{url}: #{e.message}")
+      rescue HTTPClient::RetryableResponse => e
+        raise ServerError.new("Retryable response from #{url}: #{e.message}")
+      rescue HTTPClient::KeepAliveDisconnected => e
+        raise ServerError.new("Keep-Alive disconnected from #{url}: #{e.message}")
       end
 
       if response.status != 200
