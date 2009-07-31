@@ -2,15 +2,17 @@
 
 Gem::Specification.new do |s|
   s.name = %q{html_render}
-  s.version = "0.0.6"
+  s.version = "0.0.7"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 1.2") if s.respond_to? :required_rubygems_version=
   s.authors = ["Adam Hooper"]
-  s.date = %q{2009-06-29}
+  s.date = %q{2009-07-31}
+  s.default_executable = %q{render-html}
   s.description = %q{Make images from HTML strings}
   s.email = %q{adam@adamhooper.com}
-  s.extra_rdoc_files = ["README.rdoc", "lib/html_render.rb", "lib/html_render/render_batches.rb", "lib/html_render/renderers.rb", "lib/html_render/images.rb", "lib/html_render/render_test.rb", "lib/html_render/render_test/rails.rb"]
-  s.files = ["README.rdoc", "Rakefile", "html_render.gemspec", "lib/html_render.rb", "lib/html_render/render_batches.rb", "lib/html_render/renderers.rb", "lib/html_render/images.rb", "lib/html_render/render_test.rb", "lib/html_render/render_test/rails.rb", "Manifest"]
+  s.executables = ["render-html"]
+  s.extra_rdoc_files = ["README.rdoc", "bin/render-html", "lib/html_render.rb", "lib/html_render/render_batches.rb", "lib/html_render/renderers.rb", "lib/html_render/images.rb", "lib/html_render/render_test.rb", "lib/html_render/render_test/rails.rb"]
+  s.files = ["README.rdoc", "Rakefile", "html_render.gemspec", "bin/render-html", "lib/html_render.rb", "lib/html_render/render_batches.rb", "lib/html_render/renderers.rb", "lib/html_render/images.rb", "lib/html_render/render_test.rb", "lib/html_render/render_test/rails.rb", "Manifest"]
   s.has_rdoc = true
   s.homepage = %q{http://adamhooper.com/eng}
   s.rdoc_options = ["--line-numbers", "--inline-source", "--title", "Html_render", "--main", "README.rdoc"]

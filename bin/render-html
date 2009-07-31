@@ -1,0 +1,54 @@
+#!/usr/bin/env ruby
+
+require 'optparse'
+require 'ostruct'
+
+options = OpenStruct.new
+options.verbose = false
+options.infile = '-'
+
+parser = OptionParser.new do |opts|
+  opts.banner = "Usage: #{$0} [options] 'http://server/url' outfile.png"
+
+  opts.on('-i', '--infile=FILE', 'HTML to render (defaults to stdin)') do |v|
+    options.infile = v
+  end
+  opts.on('-v', '--[no-]verbose', 'Run verbosely') do |v|
+    options.verbose = v
+  end
+end
+args = parser.parse!
+unless args.length == 2
+  parser.abort('wrong number of arguments')
+end
+
+options.server_url, options.outfile = args
+
+require 'logger'
+
+log = Logger.new($stdout)
+log.level = options.verbose ? Logger::INFO : Logger::WARN
+
+html = if options.infile == '-'
+  $stdin.read
+else
+  begin
+    File.open(options.infile, 'r') { |f| f.read }
+  rescue IOError => e
+    log.fatal("Failed to read #{options.infile}: #{e.message}")
+  end
+end
+
+require 'rubygems'
+require 'html_render'
+
+log.info "Initializing HTTP renderer with url #{options.server_url}..."
+renderer = HTMLRender::Renderers::HTTPRenderer.new(options.server_url)
+log.info 'Generating image...'
+image = renderer.render(html)
+log.info 'Writing image...'
+begin
+  File.open(options.outfile, 'w') { |f| f.write(image.to_blob) }
+rescue IOError => e
+  log.fatal("Failed to write #{options.outfile}: #{e.message}")
+end
