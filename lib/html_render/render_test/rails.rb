@@ -150,7 +150,7 @@ module HTMLRender::RenderTest::Rails
         template_path = File.dirname(relative_path)
         test_key = File.basename(relative_path)
 
-        it 'should render properly' do
+        it("should render #{relative_path} properly") do
           test_case = Common::create_test_case_from_path(relative_path, options.merge(:test_prefix => base_path))
           result = test_case.run(servers)
           result.details.each do |server, detail|
@@ -166,24 +166,8 @@ module HTMLRender::RenderTest::Rails
           raise ArgumentError.new("options[:servers] must be a hash of :unique_identifier => \"http://path.to.server/which/renders/pngs\"")
         end
 
-        cwd = []
-        context_stack = []
-
         paths = Dir.glob(File.join(base_path, '**', 'setup.rb')).sort.each do |setup_path|
-          relative_path = File.dirname(setup_path[(base_path.length + 1)..-1])
-          path_parts = relative_path.split('/')
-
-          until relative_path =~ %r%^#{Regexp.quote(cwd.join('/'))}%
-            cwd.pop
-            context_stack.pop
-          end
-
-          until cwd.length == path_parts.length
-            cwd.push(path_parts[cwd.length])
-            context_stack.push((context_stack.last || self).describe("/#{cwd.join('/')}", :type => :render))
-          end
-
-          context_stack.last.define_example(setup_path, base_path, servers, options)
+          define_example(setup_path, base_path, servers, options)
         end
       end
     end

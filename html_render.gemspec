@@ -2,11 +2,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{html_render}
-  s.version = "0.0.7"
+  s.version = "0.0.8"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 1.2") if s.respond_to? :required_rubygems_version=
   s.authors = ["Adam Hooper"]
-  s.date = %q{2009-07-31}
+  s.date = %q{2009-08-20}
   s.default_executable = %q{render-html}
   s.description = %q{Make images from HTML strings}
   s.email = %q{adam@adamhooper.com}
